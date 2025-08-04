@@ -59,7 +59,7 @@ export default function App(){
                     <Stack.Screen name="Dashboard" component={DashboardScreen} />
                     <Stack.Screen name="CDSOnboarding" component={CDSOnboardingScreen} />
                     <Stack.Screen name="AIAutopilot" component={AIAutopilotScreen} />
-                    <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} />
+                    <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} options={{ headerShown: true, title: 'Fund Account' }} />
                     <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
                     <Stack.Screen name="Splash" component={SplashScreen} />
                     

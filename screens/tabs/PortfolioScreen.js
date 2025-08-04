@@ -19,99 +19,101 @@ export default function PortfolioScreen({navigation}) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.secHeader}>
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.title}>HISA</Text>
-                        <TouchableOpacity style={styles.globeIcon}>
-                            <Ionicons name="globe-outline" size={TITLE_SIZE * 0.8} color="#102a54" />
-                        </TouchableOpacity>
-                    </View>
-                    
-                    <Text style={styles.subtitle}>Portfolio balance</Text>
-                    <Text style={styles.balance}>KES 100,000</Text>
-                    <View style={styles.gain}>
-                        <Ionicons name="chevron-up" size={18} color="green" />
-                        <Text style={styles.gainText}>+5.2%</Text>
-                    </View>
-                    <Text style={styles.allTime}>All-time</Text>
-
-                    <View style={styles.toggleContainer}>
-                        <TouchableOpacity
-                            style={[styles.toggleButton, mode === "Manual" && styles.selectedButton]}
-                            onPress={() => setMode("Manual")}>
-                            <Text style={[styles.toggleText, mode === "Manual" && styles.selectedText]}>Manual</Text>
-                        </TouchableOpacity>
+                <View style={styles.contentWrapper}>
+                    <View style={styles.secHeader}>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.title}>HISA</Text>
+                            <TouchableOpacity style={styles.globeIcon}>
+                                <Ionicons name="globe-outline" size={TITLE_SIZE * 0.8} color="#102a54" />
+                            </TouchableOpacity>
+                        </View>
                         
-                        <TouchableOpacity
-                            style={[styles.toggleButton, mode === "Automated" && styles.selectedButton]}
-                            onPress={() => setMode("Automated")}>
-                            <Text style={[styles.toggleText, mode === "Automated" && styles.selectedText]}>Automated</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                        <Text style={styles.subtitle}>Portfolio balance</Text>
+                        <Text style={styles.balance}>KES 100,000</Text>
+                        <View style={styles.gain}>
+                            <Ionicons name="chevron-up" size={18} color="green" />
+                            <Text style={styles.gainText}>+5.2%</Text>
+                        </View>
+                        <Text style={styles.allTime}>All-time</Text>
 
-                <View style={styles.secContent}>
-                    <View style={styles.activeBrokerRow}>
-                        <Text style={styles.label}>Active Broker</Text>
-                        <View style={styles.activeBroker}>
-                            <Text style={styles.activeBrokerLabel}>AIB-AXYS</Text>
-                            <Ionicons name="chevron-forward" size={18} color="green" />
+                        <View style={styles.toggleContainer}>
+                            <TouchableOpacity
+                                style={[styles.toggleButton, mode === "Manual" && styles.selectedButton]}
+                                onPress={() => setMode("Manual")}>
+                                <Text style={[styles.toggleText, mode === "Manual" && styles.selectedText]}>Manual</Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity
+                                style={[styles.toggleButton, mode === "Automated" && styles.selectedButton]}
+                                onPress={() => setMode("Automated")}>
+                                <Text style={[styles.toggleText, mode === "Automated" && styles.selectedText]}>Automated</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
 
-                    <View style={styles.separator} />
+                    <View style={styles.secContent}>
+                        <View style={styles.activeBrokerRow}>
+                            <Text style={styles.label}>Active Broker</Text>
+                            <View style={styles.activeBroker}>
+                                <Text style={styles.activeBrokerLabel}>AIB-AXYS</Text>
+                                <Ionicons name="chevron-forward" size={18} color="green" />
+                            </View>
+                        </View>
 
-                    <View style={styles.riskModeRow}>
-                        <Text style={styles.label}>Risk Mode</Text>
-                        <Text style={styles.riskModeLabel}>Change</Text>
-                    </View>
+                        <View style={styles.separator} />
 
-                    <View style={styles.riskContainer}>
-                        {["Low", "Medium", "High"].map((level, index) => {
-                            const isFirst = index === 0;
-                            const isMiddle = index === 1;
-                            const isLast = index === 2;
+                        <View style={styles.riskModeRow}>
+                            <Text style={styles.label}>Risk Mode</Text>
+                            <Text style={styles.riskModeLabel}>Change</Text>
+                        </View>
+
+                        <View style={styles.riskContainer}>
+                            {["Low", "Medium", "High"].map((level, index) => {
+                                const isFirst = index === 0;
+                                const isMiddle = index === 1;
+                                const isLast = index === 2;
+                                
+                                return (
+                                    <TouchableOpacity
+                                        key={level}
+                                        style={[
+                                            styles.riskButton,
+                                            isFirst && styles.firstRiskButton,
+                                            isMiddle && styles.middleRiskButton,
+                                            isLast && styles.lastRiskButton,
+                                            risk === level && styles.selectedRisk
+                                        ]}
+                                        onPress={() => setRisk(level)}>
+                                        <Text style={risk === level ? styles.selectedText : styles.riskText}>{level}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+
+                        <TouchableOpacity style={styles.fundButton} onPress={() => navigation.navigate('MPESAWallet')}>
+                            <Text style={styles.fundButtonText}>Fund Account</Text>
+                        </TouchableOpacity>
+
+                        <View style={styles.marketSection}>
+                            <Text style={styles.marketTitle}>Today's Market Highlights</Text>
                             
-                            return (
-                                <TouchableOpacity
-                                    key={level}
-                                    style={[
-                                        styles.riskButton,
-                                        isFirst && styles.firstRiskButton,
-                                        isMiddle && styles.middleRiskButton,
-                                        isLast && styles.lastRiskButton,
-                                        risk === level && styles.selectedRisk
-                                    ]}
-                                    onPress={() => setRisk(level)}>
-                                    <Text style={risk === level ? styles.selectedText : styles.riskText}>{level}</Text>
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-
-                    <TouchableOpacity style={styles.fundButton}>
-                        <Text style={styles.fundButtonText}>Fund Account</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.marketSection}>
-                        <Text style={styles.marketTitle}>Today’s Market Highlights</Text>
-                        
-                        <View style={{ width: '100%' }}>
-                            {stockData.map((stock) => (
-                                <View key={stock.name} style={styles.stockItem}>
-                                    <View style={styles.stockRow}>
-                                        <Text style={styles.stockName}>{stock.name}</Text>
-                                        <Text
-                                            style={[
-                                                styles.stockChange,
-                                                stock.change.includes("↓") && { color: "red" },
-                                            ]}>
-                                            {stock.change}
-                                        </Text>
+                            <View style={{ width: '100%' }}>
+                                {stockData.map((stock) => (
+                                    <View key={stock.name} style={styles.stockItem}>
+                                        <View style={styles.stockRow}>
+                                            <Text style={styles.stockName}>{stock.name}</Text>
+                                            <Text
+                                                style={[
+                                                    styles.stockChange,
+                                                    stock.change.includes("↓") && { color: "red" },
+                                                ]}>
+                                                {stock.change}
+                                            </Text>
+                                        </View>
+                                        <Text style={styles.topGainer}>{stock.label}</Text>
                                     </View>
-                                    <Text style={styles.topGainer}>{stock.label}</Text>
-                                </View>
-                            ))}
+                                ))}
+                            </View>
                         </View>
                     </View>
                 </View>
@@ -366,5 +368,10 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
         paddingBottom: 40,
+    },
+    contentWrapper: {
+        width: '100%',
+        maxWidth: 400,
+        alignSelf: 'center',
     }
 });

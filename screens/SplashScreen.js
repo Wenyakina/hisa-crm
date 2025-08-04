@@ -41,15 +41,6 @@ export default function SplashScreen({ navigation }) {
             Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
         ]).start();
     };
-
-    const shakeRegistration = () => {
-        Animated.sequence([
-            Animated.timing(registrationShakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-            Animated.timing(registrationShakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
-            Animated.timing(registrationShakeAnimation, { toValue: 6, duration: 50, useNativeDriver: true }),
-            Animated.timing(registrationShakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
-  ]).start();
-};
     
     const saveUser = async () => {
         const { name, pin, email, phone } = userForm;
