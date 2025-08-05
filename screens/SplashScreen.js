@@ -111,7 +111,7 @@ export default function SplashScreen({ navigation }) {
                 <Image source={require('../assets/images/splash_bg_1.png')} style={styles.image} resizeMode="contain" />
                 <Text style={styles.title}>Welcome to</Text>
                 <Text style={styles.brand} onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}>HISA Technologies</Text>
-                <Text style={styles.subtitle}>Technology for Smarter Investing in Africa</Text>
+                <Text style={styles.subtitle}>Free and Ready to Go</Text>
                 <TouchableOpacity 
                     onPress={() => {
                         setPin(['', '', '', '']);
@@ -120,7 +120,6 @@ export default function SplashScreen({ navigation }) {
                     style={[styles.button, { width: textWidth }]}>
                     <Text style={styles.buttonText}>Get Started</Text>
                 </TouchableOpacity>
-                <Text style={styles.subtitle2}>Free and Ready to Go</Text>
             </View>
             
             {/* Registration Modal */}

@@ -1,24 +1,45 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from "react";
+import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { marketData } from '../utils/MarketData';
+import { getUserIdAndBalance } from '../utils/UserData';
 
 const TITLE_SIZE = 48;
 
-export default function PortfolioScreen({navigation}) {
+export default function PortfolioScreen({ navigation }) {
     const [mode, setMode] = useState("Automated");
     const [risk, setRisk] = useState("Medium");
-    const stockData = [
-        {name: "Safaricom", change: "↑ 8.1%", label: "Top Gainer"},
-        {name: "KCB", change: "↑ 3.4%", label: "Top Gainer"},
-        {name: "NCBA", change: "↓ 1.2%", label: "Top Loser"},
-        {name: "Vipingo", change: "↑ 5.7%", label: "Top Gainer"},
-        {name: "Kakuzi", change: "↓ 0.8%", label: "Top Loser"},
-        {name: "Bamburi", change: "↑ 2.3%", label: "Top Gainer"},
-    ];
-    
+    const [userId, setUserId] = useState(null);
+    const [balance, setBalance] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const stockData = marketData;
+
+    const loadData = async () => {
+        const { userId, balance } = await getUserIdAndBalance();
+        setUserId(userId);
+        setBalance(balance);
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await loadData();
+        setRefreshing(false);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContainer}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
                 <View style={styles.contentWrapper}>
                     <View style={styles.secHeader}>
                         <View style={styles.titleContainer}>
@@ -27,9 +48,9 @@ export default function PortfolioScreen({navigation}) {
                                 <Ionicons name="globe-outline" size={TITLE_SIZE * 0.8} color="#102a54" />
                             </TouchableOpacity>
                         </View>
-                        
+
                         <Text style={styles.subtitle}>Portfolio balance</Text>
-                        <Text style={styles.balance}>KES 100,000</Text>
+                        <Text style={styles.balance}>KES {balance.toLocaleString()}</Text>
                         <View style={styles.gain}>
                             <Ionicons name="chevron-up" size={18} color="green" />
                             <Text style={styles.gainText}>+5.2%</Text>
@@ -39,13 +60,15 @@ export default function PortfolioScreen({navigation}) {
                         <View style={styles.toggleContainer}>
                             <TouchableOpacity
                                 style={[styles.toggleButton, mode === "Manual" && styles.selectedButton]}
-                                onPress={() => setMode("Manual")}>
+                                onPress={() => setMode("Manual")}
+                            >
                                 <Text style={[styles.toggleText, mode === "Manual" && styles.selectedText]}>Manual</Text>
                             </TouchableOpacity>
-                            
+
                             <TouchableOpacity
                                 style={[styles.toggleButton, mode === "Automated" && styles.selectedButton]}
-                                onPress={() => setMode("Automated")}>
+                                onPress={() => setMode("Automated")}
+                            >
                                 <Text style={[styles.toggleText, mode === "Automated" && styles.selectedText]}>Automated</Text>
                             </TouchableOpacity>
                         </View>
@@ -72,7 +95,7 @@ export default function PortfolioScreen({navigation}) {
                                 const isFirst = index === 0;
                                 const isMiddle = index === 1;
                                 const isLast = index === 2;
-                                
+
                                 return (
                                     <TouchableOpacity
                                         key={level}
@@ -81,9 +104,10 @@ export default function PortfolioScreen({navigation}) {
                                             isFirst && styles.firstRiskButton,
                                             isMiddle && styles.middleRiskButton,
                                             isLast && styles.lastRiskButton,
-                                            risk === level && styles.selectedRisk
+                                            risk === level && styles.selectedRisk,
                                         ]}
-                                        onPress={() => setRisk(level)}>
+                                        onPress={() => setRisk(level)}
+                                    >
                                         <Text style={risk === level ? styles.selectedText : styles.riskText}>{level}</Text>
                                     </TouchableOpacity>
                                 );
@@ -96,22 +120,30 @@ export default function PortfolioScreen({navigation}) {
 
                         <View style={styles.marketSection}>
                             <Text style={styles.marketTitle}>Today's Market Highlights</Text>
-                            
                             <View style={{ width: '100%' }}>
                                 {stockData.map((stock) => (
-                                    <View key={stock.name} style={styles.stockItem}>
+                                    <TouchableOpacity
+                                        key={stock.id}
+                                        style={styles.stockItem}
+                                        onPress={() => navigation.navigate('BuyStock', { stock })}
+                                        activeOpacity={0.7}>
                                         <View style={styles.stockRow}>
-                                            <Text style={styles.stockName}>{stock.name}</Text>
+                                            <Text style={styles.stockName}>{stock.ticker}</Text>
                                             <Text
                                                 style={[
                                                     styles.stockChange,
-                                                    stock.change.includes("↓") && { color: "red" },
+                                                    Number(stock.change) < 0 && { color: 'red' },
+                                                    Number(stock.change) > 0 && { color: 'green' },
                                                 ]}>
-                                                {stock.change}
+                                                {Number(stock.change) > 0
+                                                    ? `↑ ${stock.change}%`
+                                                    : Number(stock.change) < 0
+                                                    ? `↓ ${Math.abs(stock.change)}%`
+                                                    : `${stock.change}%`}
                                             </Text>
                                         </View>
-                                        <Text style={styles.topGainer}>{stock.label}</Text>
-                                    </View>
+                                        <Text style={styles.topGainer}>{stock.category}</Text>
+                                    </TouchableOpacity>
                                 ))}
                             </View>
                         </View>

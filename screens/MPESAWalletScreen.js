@@ -33,7 +33,8 @@ export default function MPESAWalletScreen({ navigation }) {
                         fetchTransactions(userObj.id);
                     }
                 }
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error('Failed to retrieve user from storage:', err);
             }
         };
@@ -213,7 +214,10 @@ const styles = StyleSheet.create({
         marginBottom: 16
     },
     button: {
-        marginBottom: 20
+        marginBottom: 20,
+        padding: 4,
+        borderRadius: 6,
+        backgroundColor: '#307def'
     },
     section: {
         marginBottom: 10

@@ -2,11 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { PaperProvider } from 'react-native-paper';
 
 // Import screens
 import AdminDashboardScreen from './screens/AdminDashboardScreen';
 import AIAutopilotScreen from './screens/AIAutopilotScreen';
+import BuyStockScreen from './screens/BuyStockScreen';
 import CDSOnboardingScreen from './screens/CDSOnboardingScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import MPESAWalletScreen from './screens/MPESAWalletScreen';
@@ -53,19 +53,18 @@ function MainTabs(){
 
 export default function App(){
     return (
-        <PaperProvider>
-            <NavigationContainer>
-                <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="Dashboard" component={DashboardScreen} />
-                    <Stack.Screen name="CDSOnboarding" component={CDSOnboardingScreen} />
-                    <Stack.Screen name="AIAutopilot" component={AIAutopilotScreen} />
-                    <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} options={{ headerShown: true, title: 'Fund Account' }} />
-                    <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
-                    <Stack.Screen name="Splash" component={SplashScreen} />
-                    
-                    <Stack.Screen name="MainApp" component={MainTabs} />
-                </Stack.Navigator>
-            </NavigationContainer>
-        </PaperProvider>
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Dashboard" component={DashboardScreen} />
+                <Stack.Screen name="CDSOnboarding" component={CDSOnboardingScreen} />
+                <Stack.Screen name="AIAutopilot" component={AIAutopilotScreen} />
+                <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} options={{ headerShown: true, title: 'Fund Account' }} />
+                <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+                <Stack.Screen name="Splash" component={SplashScreen} />
+                <Stack.Screen name="BuyStock" component={BuyStockScreen} options={{ headerShown: true, title: 'Buy Stock' }} />
+                
+                <Stack.Screen name="MainApp" component={MainTabs} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
