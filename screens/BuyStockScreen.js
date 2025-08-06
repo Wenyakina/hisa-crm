@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Menu, Provider, Text, TextInput } from 'react-native-paper';
 import ReviewOrderDialog from './dialogs/ReviewOrderDialog';
+import { currentMarketData } from './utils/MarketData';
 import { getUserIdAndBalance } from './utils/UserData';
 
 export default function BuyStockScreen({ navigation }) {
@@ -25,13 +26,32 @@ export default function BuyStockScreen({ navigation }) {
     const [dialogVisible, setDialogVisible] = useState(false);
     const [lastOrderSuccess, setLastOrderSuccess] = useState(null);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredTickers, setFilteredTickers] = useState([]);
+    const [showSearchResults, setShowSearchResults] = useState(false);
+
     useEffect(() => {
         const loadBalance = async () => {
-            const { balance: fetchedBalance } = await getUserIdAndBalance();
-            setBalance(fetchedBalance);
+            const { walletBalance } = await getUserIdAndBalance();
+            setBalance(walletBalance);
         };
         loadBalance();
     }, []);
+
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredTickers([]);
+            setShowSearchResults(false);
+            return;
+        }
+
+        const filtered = currentMarketData.filter(stock =>
+            stock.ticker.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        setFilteredTickers(filtered);
+        setShowSearchResults(true);
+    }, [searchQuery]);
 
     useEffect(() => {
         const qty = selectedQty || quantity || 0;
@@ -50,6 +70,36 @@ export default function BuyStockScreen({ navigation }) {
     return (
         <Provider>
             <ScrollView contentContainerStyle={styles.container}>
+                <Text style={styles.label}>Search Ticker</Text>
+                <TextInput
+                    mode="outlined"
+                    placeholder="Enter Ticker (e.g., KCB)"
+                    value={searchQuery}
+                    onChangeText={text => setSearchQuery(text)}
+                    style={[styles.input, styles.customInputBorder]}/>
+
+                {showSearchResults && filteredTickers.length > 0 && (
+                    <View style={{ marginBottom: 16, backgroundColor: '#f0f0f0', borderRadius: 6 }}>
+                        {filteredTickers.map(stock => (
+                            <Button
+                                key={stock.id}
+                                mode="text"
+                                onPress={() => {
+                                    setSearchQuery(stock.ticker);
+                                    setShowSearchResults(false);
+                                    navigation.setParams({ stock }); // Update route stock
+                                    setUnitPrice(stock.price);
+                                }}
+                                contentStyle={{ justifyContent: 'flex-start' }}
+                                textColor="#1976D2"
+                                style={{ paddingVertical: 4, borderBottomWidth: 0.5, borderColor: '#ccc' }}
+                            >
+                                {stock.ticker} - {stock.category} @ {stock.price} KES
+                            </Button>
+                        ))}
+                    </View>
+                )}
+
                 <Text style={styles.header}>Buy {selectedStock.ticker}</Text>
                 <Text style={styles.subheader}>{selectedStock.category}</Text>
 
@@ -156,8 +206,6 @@ export default function BuyStockScreen({ navigation }) {
     );
 }
 
-
-
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -168,6 +216,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 4,
+        marginTop: 4,
         color: '#121619'
     },
     subheader: {
