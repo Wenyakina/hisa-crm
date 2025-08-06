@@ -60,7 +60,14 @@ export default function SplashScreen({ navigation }) {
                 return;
             }
 
-            const docRef = await addDoc(collection(db, 'users'), { name, pin, email, phone, portfolioBalance: 0});
+            const docRef = await addDoc(collection(db, 'users'), { 
+                name, 
+                pin, 
+                email, 
+                phone, 
+                portfolioBalance: 0,
+                walletBalance: 0
+            });
             await AsyncStorage.setItem('user', JSON.stringify({ id: docRef.id, pin }));
             
             setRegistrationVisible(false);
