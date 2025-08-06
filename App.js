@@ -4,15 +4,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Import screens
-import AdminDashboardScreen from './screens/AdminDashboardScreen';
-import AIAutopilotScreen from './screens/AIAutopilotScreen';
 import BuyStockScreen from './screens/BuyStockScreen';
-import CDSOnboardingScreen from './screens/CDSOnboardingScreen';
-import DashboardScreen from './screens/DashboardScreen';
 import MPESAWalletScreen from './screens/MPESAWalletScreen';
 import SplashScreen from './screens/SplashScreen';
 
-import LearnScreen from './screens/tabs/LearnScreen';
+import HomeScreen from './screens/tabs/HomeScreen';
 import MarketScreen from './screens/tabs/MarketScreen';
 import PortfolioScreen from './screens/tabs/PortfolioScreen';
 
@@ -36,7 +32,7 @@ function MainTabs(){
                     else if(route.name === 'Markets'){
                         iconName = focused ? 'trending-up' : 'trending-up-outline';
                     }
-                    else if(route.name === 'Learn'){
+                    else if(route.name === 'Portfolio'){
                         iconName = focused ? 'book' : 'book-outline';
                     }
 
@@ -44,9 +40,9 @@ function MainTabs(){
                 },
             })}>
             
-            <Tab.Screen name="Home" component={PortfolioScreen} />
+            <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Markets" component={MarketScreen} />
-            <Tab.Screen name="Learn" component={LearnScreen} />
+            <Tab.Screen name="Portfolio" component={PortfolioScreen} />
         </Tab.Navigator>
     );
 }
@@ -55,11 +51,7 @@ export default function App(){
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Dashboard" component={DashboardScreen} />
-                <Stack.Screen name="CDSOnboarding" component={CDSOnboardingScreen} />
-                <Stack.Screen name="AIAutopilot" component={AIAutopilotScreen} />
                 <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} options={{ headerShown: true, title: 'Fund Account' }} />
-                <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="BuyStock" component={BuyStockScreen} options={{ headerShown: true, title: 'Buy Stock' }} />
                 
