@@ -1,8 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useCallback, useState } from "react";
 import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { currentMarketData } from '../utils/MarketData';
+import { db } from '../../firebaseConfig';
+import { marketData } from '../utils/MarketData';
 import { getUserIdAndBalance } from '../utils/UserData';
 
 const TITLE_SIZE = 48;
@@ -18,7 +20,7 @@ export default function HomeScreen({ navigation }) {
 
     const [refreshing, setRefreshing] = useState(false);
 
-    const stockData = currentMarketData;
+    const stockData = marketData;
 
     const loadData = async () => {
         const { 
@@ -50,6 +52,50 @@ export default function HomeScreen({ navigation }) {
         setRefreshing(true);
         await loadData();
         setRefreshing(false);
+    };
+
+    const updateActiveBrokerInFirestore = async (ticker) => {
+        try {
+            const userRef = doc(db, 'users', userId);
+            await updateDoc(userRef, {
+                activeBroker: ticker
+            });
+
+            console.log('Active broker updated to:', ticker);
+        } 
+        catch (err) {
+            console.error('Failed to update active broker:', err);
+        }
+    };
+
+    const updateTradingModeInFirestore = async (newMode) => {
+        try {
+            const userRef = doc(db, 'users', userId);
+            
+            await updateDoc(userRef, {
+                tradingMode: newMode
+            });
+
+            console.log('Trading mode updated to:', newMode);
+        } 
+        catch (err) {
+            console.error('Failed to update trading mode:', err);
+        }
+    };
+
+    const updateRiskModeInFirestore = async (newRiskMode) => {
+        try {
+            const userRef = doc(db, 'users', userId);
+            
+            await updateDoc(userRef, {
+                riskMode: newRiskMode
+            });
+
+            console.log('Risk mode updated to:', newRiskMode);
+        } 
+        catch (err) {
+            console.error('Failed to update risk mode:', err);
+        }
     };
 
     return (
@@ -85,7 +131,7 @@ export default function HomeScreen({ navigation }) {
                                 <Text style={styles.balanceLabel}>Wallet Balance</Text>
                                 <Text style={styles.balanceAmount}>KES {walletBalance.toLocaleString()}</Text>
                                 <View style={styles.gain}>
-                                    <Text style={styles.gainTextNoText}>""</Text>
+                                    <Text style={styles.gainTextNoText}>&quot;&quot;</Text>
                                 </View>
                             </View>
                         </View>
@@ -93,15 +139,19 @@ export default function HomeScreen({ navigation }) {
                         <View style={styles.toggleContainer}>
                             <TouchableOpacity
                                 style={[styles.toggleButton, mode === "Manual" && styles.selectedButton]}
-                                onPress={() => setMode("Manual")}
-                            >
+                                onPress={async () => {
+                                    setMode("Manual");
+                                    await updateTradingModeInFirestore("Manual");
+                                }}>
                                 <Text style={[styles.toggleText, mode === "Manual" && styles.selectedText]}>Manual</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={[styles.toggleButton, mode === "Automated" && styles.selectedButton]}
-                                onPress={() => setMode("Automated")}
-                            >
+                                onPress={async () => {
+                                    setMode("Automated");
+                                    await updateTradingModeInFirestore("Automated");
+                                }}>
                                 <Text style={[styles.toggleText, mode === "Automated" && styles.selectedText]}>Automated</Text>
                             </TouchableOpacity>
                         </View>
@@ -123,7 +173,7 @@ export default function HomeScreen({ navigation }) {
                         {mode === 'Automated' && (
                         <View style={styles.riskModeRow}>
                             <Text style={styles.label}>Risk Mode</Text>
-                            <Text style={styles.riskModeLabel}>Change</Text>
+                            <Text style={styles.riskModeLabel}>{risk}</Text>
                         </View>
                         )}
 
@@ -144,8 +194,10 @@ export default function HomeScreen({ navigation }) {
                                             isLast && styles.lastRiskButton,
                                             risk === level && styles.selectedRisk,
                                         ]}
-                                        onPress={() => setRisk(level)}
-                                    >
+                                        onPress={async () => {
+                                            setRisk(level);
+                                            await updateRiskModeInFirestore(level);
+                                        }}>
                                         <Text style={risk === level ? styles.selectedText : styles.riskText}>{level}</Text>
                                     </TouchableOpacity>
                                 );
@@ -176,30 +228,42 @@ export default function HomeScreen({ navigation }) {
                         <View style={styles.marketSection}>
                             <Text style={styles.marketTitle}>Today&apos;s Market Highlights</Text>
                             <View style={{ width: '100%' }}>
-                                {stockData.map((stock) => (
-                                    <TouchableOpacity
-                                        key={stock.id}
-                                        style={styles.stockItem}
-                                        onPress={() => navigation.navigate('BuyStock', { stock })}
-                                        activeOpacity={0.7}>
-                                        <View style={styles.stockRow}>
-                                            <Text style={styles.stockName}>{stock.ticker}</Text>
-                                            <Text
-                                                style={[
-                                                    styles.stockChange,
-                                                    Number(stock.change) < 0 && { color: 'red' },
-                                                    Number(stock.change) > 0 && { color: 'green' },
-                                                ]}>
-                                                {Number(stock.change) > 0
-                                                    ? `↑ ${stock.change}%`
-                                                    : Number(stock.change) < 0
-                                                    ? `↓ ${Math.abs(stock.change)}%`
-                                                    : `${stock.change}%`}
-                                            </Text>
+                                {stockData.map((stock, index) => {
+                                    const { prev_price, curr_price } = stock;
+                                    const change = ((curr_price - prev_price) / prev_price) * 100;
+                                    const isGain = change > 0;
+                                    const isLoss = change < 0;
+
+                                    return (
+                                        <View
+                                            key={stock.id}
+                                            style={styles.stockItem}
+                                            activeOpacity={0.7}>
+                                            <View style={styles.stockRow}>
+                                                <Text style={styles.stockName}>{stock.name}</Text>
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                    <Ionicons
+                                                        name={isGain ? "chevron-up" : isLoss ? "chevron-down" : "remove"}
+                                                        size={14}
+                                                        color={isGain ? "green" : isLoss ? "red" : "gray"}
+                                                        style={{ marginRight: 4 }}
+                                                    />
+                                                    <Text
+                                                        style={[
+                                                            styles.stockChange,
+                                                            { color: isGain ? "green" : isLoss ? "red" : "gray" }
+                                                        ]}>
+                                                        {change.toFixed(2)}%
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <Text style={styles.topGainer}>{stock.ticker}</Text>
+
+                                            {index !== marketData.length - 1 && <View style={styles.separatorMarketHighlight} />}
                                         </View>
-                                        <Text style={styles.topGainer}>{stock.category}</Text>
-                                    </TouchableOpacity>
-                                ))}
+                                    );
+                                })}
+
                             </View>
                         </View>
                     </View>
@@ -211,16 +275,16 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalTitle}>Select Active Broker</Text>
                     <ScrollView>
-                        {currentMarketData.map((stock) => (
+                        {marketData.map((stock) => (
                         <TouchableOpacity
                             key={stock.id}
                             style={styles.brokerOption}
-                            onPress={() => {
-                            setActiveBroker(stock.ticker);
-                            setBrokerModalVisible(false);
-                            // Optional: save to user data
+                            onPress={async () => {
+                                setActiveBroker(stock.ticker);
+                                setBrokerModalVisible(false);
+                                await updateActiveBrokerInFirestore(stock.ticker);
                             }}>
-                            <Text style={styles.brokerText}>{stock.ticker}</Text>
+                            <Text style={styles.brokerText}>{stock.name}</Text>
                         </TouchableOpacity>
                         ))}
                     </ScrollView>
@@ -420,7 +484,7 @@ const styles = StyleSheet.create({
     },
     stockItem: {
         width: '100%',
-        marginBottom: 8,
+        marginBottom: 0,
     },
     stockRow: {
         flexDirection: 'row',
@@ -542,5 +606,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    separatorMarketHighlight: {
+        height: 1,
+        backgroundColor: '#ddd',
+        marginVertical: 8,
+        marginTop: 16,
+        marginBottom: 8
     },
 });

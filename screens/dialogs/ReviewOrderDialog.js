@@ -14,41 +14,39 @@ export default function ReviewOrderDialog({ visible, onDismiss, orderDetails }) 
     } = orderDetails;
 
     const handleConfirm = async () => {
-    const {
-        userId,
-        walletBalance
-    } = await getUserIdAndBalance();
+        const {
+            userId,
+            walletBalance
+        } = await getUserIdAndBalance();
 
-    const orderData = {
-        ticker,
-        unitPrice,
-        quantity,
-        orderType,
-        estimatedCost,
-        category,
-        timestamp: new Date().toISOString()
+        const orderData = {
+            ticker,
+            unitPrice,
+            quantity,
+            orderType,
+            estimatedCost,
+            category,
+            timestamp: new Date().toISOString()
+        };
+
+        const saveKey = orderType === 'Market' ? 'trades' : 'orders';
+
+        try {
+            const userRef = doc(db, 'users', userId);
+            const updatedWalletBalance = walletBalance - estimatedCost;
+            
+            await updateDoc(userRef, {
+                [saveKey]: arrayUnion(orderData),
+                walletBalance: updatedWalletBalance
+            });
+
+            onDismiss(true);
+        } 
+        catch (error) {
+            console.error('Error saving order and updating wallet balance:', error);
+            onDismiss(false);
+        }
     };
-
-    const saveKey = orderType === 'Market' ? 'trades' : 'orders';
-
-    try {
-        const userRef = doc(db, 'users', userId);
-
-        // Calculate new wallet balance
-        const updatedWalletBalance = walletBalance - estimatedCost;
-
-        // Update Firestore: append order + update wallet balance
-        await updateDoc(userRef, {
-            [saveKey]: arrayUnion(orderData),
-            walletBalance: updatedWalletBalance
-        });
-
-        onDismiss(true);
-    } catch (error) {
-        console.error('Error saving order and updating wallet balance:', error);
-        onDismiss(false);
-    }
-};
 
 
     return (

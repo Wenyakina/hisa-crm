@@ -92,8 +92,7 @@ export default function BuyStockScreen({ navigation }) {
                                 }}
                                 contentStyle={{ justifyContent: 'flex-start' }}
                                 textColor="#1976D2"
-                                style={{ paddingVertical: 4, borderBottomWidth: 0.5, borderColor: '#ccc' }}
-                            >
+                                style={{ paddingVertical: 4, borderBottomWidth: 0.5, borderColor: '#ccc' }}>
                                 {stock.ticker} - {stock.category} @ {stock.price} KES
                             </Button>
                         ))}
@@ -122,8 +121,7 @@ export default function BuyStockScreen({ navigation }) {
                             right={<TextInput.Icon icon="menu-down" onPress={openMenu} />}
                             style={[styles.input, styles.customInputBorder]}
                         />
-                    }
-                >
+                    }>
                     <Menu.Item onPress={() => { setOrderType('Market'); closeMenu(); }} title="Market" />
                     <Divider />
                     <Menu.Item onPress={() => { setOrderType('Limit'); closeMenu(); }} title="Limit" />
