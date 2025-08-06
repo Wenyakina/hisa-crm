@@ -120,13 +120,13 @@ export default function HomeScreen({ navigation }) {
                         {mode === 'Manual' && (
                         <View style={styles.tradeButtonsContainer}>
                             <TouchableOpacity
-                                style={[styles.tradeButton, { backgroundColor: '#e53935' }]} // Red for Buy
+                                style={[styles.tradeButton, { backgroundColor: '#43a047' }]} // Red for Buy
                                 onPress={() => navigation.navigate('BuyStock')}>
                                 <Text style={styles.tradeButtonText}>Buy Stock</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={[styles.tradeButton, { backgroundColor: '#43a047' }]} // Green for Sell
+                                style={[styles.tradeButton, { backgroundColor: '#e53935' }]} // Green for Sell
                                 onPress={() => navigation.navigate('SellStock')}>
                                 <Text style={styles.tradeButtonText}>Sell Stock</Text>
                             </TouchableOpacity>
