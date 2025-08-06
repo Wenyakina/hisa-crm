@@ -73,7 +73,7 @@ export default function PortfolioScreen({ navigation }) {
                             </TouchableOpacity>
                         </View>
                     </View>
-
+                    
                     <View style={styles.secContent}>
                         <View style={styles.activeBrokerRow}>
                             <Text style={styles.label}>Active Broker</Text>
@@ -82,14 +82,17 @@ export default function PortfolioScreen({ navigation }) {
                                 <Ionicons name="chevron-forward" size={18} color="green" />
                             </View>
                         </View>
-
+                        
                         <View style={styles.separator} />
 
+                        {mode === 'Automated' && (
                         <View style={styles.riskModeRow}>
                             <Text style={styles.label}>Risk Mode</Text>
                             <Text style={styles.riskModeLabel}>Change</Text>
                         </View>
+                        )}
 
+                        {mode === 'Automated' && (
                         <View style={styles.riskContainer}>
                             {["Low", "Medium", "High"].map((level, index) => {
                                 const isFirst = index === 0;
@@ -113,6 +116,23 @@ export default function PortfolioScreen({ navigation }) {
                                 );
                             })}
                         </View>
+                        )}
+                        
+                        {mode === 'Manual' && (
+                        <View style={styles.tradeButtonsContainer}>
+                            <TouchableOpacity
+                                style={[styles.tradeButton, { backgroundColor: '#e53935' }]} // Red for Buy
+                                onPress={() => navigation.navigate('BuyStock')}>
+                                <Text style={styles.tradeButtonText}>Buy Stock</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.tradeButton, { backgroundColor: '#43a047' }]} // Green for Sell
+                                onPress={() => navigation.navigate('SellStock')}>
+                                <Text style={styles.tradeButtonText}>Sell Stock</Text>
+                            </TouchableOpacity>
+                        </View>
+                        )}
 
                         <TouchableOpacity style={styles.fundButton} onPress={() => navigation.navigate('MPESAWallet')}>
                             <Text style={styles.fundButtonText}>Fund Account</Text>
@@ -214,7 +234,6 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         marginTop: 2
     },
-
     toggleContainer: {
         flexDirection: "row", 
         width: '100%',
@@ -237,7 +256,6 @@ const styles = StyleSheet.create({
     selectedText: {
         color: "#fff", fontWeight: "bold"
     },
-
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -254,7 +272,6 @@ const styles = StyleSheet.create({
         fontWeight: "400", 
         color: "#515c6e"
     },
-
     riskContainer: {
         flexDirection: 'row',
         width: '100%',
@@ -292,7 +309,6 @@ const styles = StyleSheet.create({
     riskText: {
         fontSize: 16, color: "#333"
     },
-
     fundButton: {
         backgroundColor: "#002b5c",
         paddingVertical: 14,
@@ -305,7 +321,6 @@ const styles = StyleSheet.create({
         color: "#fff", 
         fontSize: 18
     },
-
     marketSection: {
         width: '100%',
         alignItems: 'flex-start',
@@ -329,7 +344,6 @@ const styles = StyleSheet.create({
         color: "green", 
         marginTop: 5
     },
-
     tabBar: {
         flexDirection: "row",
         justifyContent: "space-around",
@@ -405,5 +419,22 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: 400,
         alignSelf: 'center',
-    }
+    },
+    tradeButtonsContainer: {
+        marginTop: 24,
+        flexDirection: "row", 
+        width: '100%',
+    },
+    tradeButton: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 10,
+        marginHorizontal: 4,
+        alignItems: 'center',
+    },
+    tradeButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
 });
