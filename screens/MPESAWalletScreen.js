@@ -48,8 +48,8 @@ export default function MPESAWalletScreen({ navigation }) {
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
                 const data = userDoc.data();
-                if (data?.portfolioBalance != null) {
-                    setBalance(data.portfolioBalance);
+                if (data?.walletBalance != null) {
+                    setBalance(data.walletBalance);
                 }
             }
         } catch (err) {
@@ -105,7 +105,7 @@ export default function MPESAWalletScreen({ navigation }) {
             const newBalance = balance + amt;
             const userRef = doc(db, 'users', userId);
             await updateDoc(userRef, {
-                portfolioBalance: newBalance
+                walletBalance: newBalance
             });
             setBalance(newBalance);
 
