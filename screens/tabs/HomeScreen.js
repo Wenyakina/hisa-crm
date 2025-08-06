@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from "react";
 import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { marketData } from '../utils/MarketData';
+import { currentMarketData } from '../utils/MarketData';
 import { getUserIdAndBalance } from '../utils/UserData';
 
 const TITLE_SIZE = 48;
@@ -11,15 +11,33 @@ export default function HomeScreen({ navigation }) {
     const [mode, setMode] = useState("Automated");
     const [risk, setRisk] = useState("Medium");
     const [userId, setUserId] = useState(null);
-    const [balance, setBalance] = useState(0);
+    const [portfolioBalance, setPortfolioBalance] = useState(0);
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [activeBroker, setActiveBroker] = useState("N/A");
+    const [brokerModalVisible, setBrokerModalVisible] = useState(false);
+
     const [refreshing, setRefreshing] = useState(false);
 
-    const stockData = marketData;
+    const stockData = currentMarketData;
 
     const loadData = async () => {
-        const { userId, balance } = await getUserIdAndBalance();
+        const { 
+            userId, 
+            portfolioBalance, 
+            walletBalance, 
+            activeBroker,
+            riskMode,
+            tradingMode,
+            prevStockVal,
+            currStockVal
+        } = await getUserIdAndBalance();
+
         setUserId(userId);
-        setBalance(balance);
+        setPortfolioBalance(portfolioBalance);
+        setWalletBalance(walletBalance);
+        setActiveBroker(activeBroker);
+        setMode(tradingMode);
+        setRisk(riskMode);
     };
 
     useFocusEffect(
@@ -48,13 +66,29 @@ export default function HomeScreen({ navigation }) {
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.subtitle}>Portfolio balance</Text>
-                        <Text style={styles.balance}>KES {balance.toLocaleString()}</Text>
-                        <View style={styles.gain}>
-                            <Ionicons name="chevron-up" size={18} color="green" />
-                            <Text style={styles.gainText}>+5.2%</Text>
+                        <View style={styles.balancesRow}>
+                            {/* Portfolio Balance */}
+                            <View style={styles.balanceColumn}>
+                                <Text style={styles.balanceLabelWallet}>Portfolio Balance</Text>
+                                <Text style={styles.balanceAmountWallet}>
+                                    KES {portfolioBalance.toLocaleString()}
+                                </Text>
+
+                                <View style={styles.gain}>
+                                    <Ionicons name="chevron-up" size={14} color="green" />
+                                    <Text style={styles.gainText}>+5.2%</Text>
+                                </View>
+                            </View>
+
+                            {/* Wallet Balance */}
+                            <View style={styles.balanceColumn}>
+                                <Text style={styles.balanceLabel}>Wallet Balance</Text>
+                                <Text style={styles.balanceAmount}>KES {walletBalance.toLocaleString()}</Text>
+                                <View style={styles.gain}>
+                                    <Text style={styles.gainTextNoText}>""</Text>
+                                </View>
+                            </View>
                         </View>
-                        <Text style={styles.allTime}>All-time</Text>
 
                         <View style={styles.toggleContainer}>
                             <TouchableOpacity
@@ -74,13 +108,15 @@ export default function HomeScreen({ navigation }) {
                     </View>
                     
                     <View style={styles.secContent}>
-                        <View style={styles.activeBrokerRow}>
+                        <TouchableOpacity
+                            style={styles.activeBrokerRow}
+                            onPress={() => setBrokerModalVisible(true)}>
                             <Text style={styles.label}>Active Broker</Text>
                             <View style={styles.activeBroker}>
-                                <Text style={styles.activeBrokerLabel}>AIB-AXYS</Text>
+                                <Text style={styles.activeBrokerLabel}>{activeBroker}</Text>
                                 <Ionicons name="chevron-forward" size={18} color="green" />
                             </View>
-                        </View>
+                        </TouchableOpacity>
                         
                         <View style={styles.separator} />
 
@@ -138,7 +174,7 @@ export default function HomeScreen({ navigation }) {
                         </TouchableOpacity>
 
                         <View style={styles.marketSection}>
-                            <Text style={styles.marketTitle}>Today's Market Highlights</Text>
+                            <Text style={styles.marketTitle}>Today&apos;s Market Highlights</Text>
                             <View style={{ width: '100%' }}>
                                 {stockData.map((stock) => (
                                     <TouchableOpacity
@@ -169,6 +205,33 @@ export default function HomeScreen({ navigation }) {
                     </View>
                 </View>
             </ScrollView>
+
+            {brokerModalVisible && (
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Select Active Broker</Text>
+                    <ScrollView>
+                        {currentMarketData.map((stock) => (
+                        <TouchableOpacity
+                            key={stock.id}
+                            style={styles.brokerOption}
+                            onPress={() => {
+                            setActiveBroker(stock.ticker);
+                            setBrokerModalVisible(false);
+                            // Optional: save to user data
+                            }}>
+                            <Text style={styles.brokerText}>{stock.ticker}</Text>
+                        </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                    <TouchableOpacity
+                        style={styles.modalCloseButton}
+                        onPress={() => setBrokerModalVisible(false)}>
+                        <Text style={styles.modalCloseText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            )}
         </SafeAreaView>
     );
 }
@@ -196,42 +259,18 @@ const styles = StyleSheet.create({
         top: '10%',
         padding: 4,
     },
-    titleRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
-    },
-    subtitle: {
-        fontSize: 24, 
-        marginTop: 24, 
-        color: "#465260",
-        fontWeight: "300"
-    },
-    balance: {
-        fontSize: 30, 
-        color: '#1c242e',
-        fontWeight: "bold", 
-        marginTop: 5
-    },
     gain: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 4,
+        marginTop: 0,
         color: "green",
     },
     gainText: {
-        fontSize: 18,
+        fontSize: 14,
         color: 'green',
         marginLeft: 4,
         fontWeight: "400",
         marginTop: 5
-    },
-    allTime: {
-        fontSize: 17, 
-        color: "#5d6d77", 
-        marginBottom: 24,
-        marginTop: 2
     },
     toggleContainer: {
         flexDirection: "row", 
@@ -255,21 +294,10 @@ const styles = StyleSheet.create({
     selectedText: {
         color: "#fff", fontWeight: "bold"
     },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        width: "100%",
-        marginTop: 10,
-    },
     label: {
         fontSize: 18, 
         color: "#262c31",
         fontWeight: "600"
-    },
-    value: {
-        fontSize: 18, 
-        fontWeight: "400", 
-        color: "#515c6e"
     },
     riskContainer: {
         flexDirection: 'row',
@@ -342,17 +370,6 @@ const styles = StyleSheet.create({
         fontSize: 18, 
         color: "green", 
         marginTop: 5
-    },
-    tabBar: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        width: "100%",
-        paddingVertical: 15,
-        borderTopWidth: 1,
-        borderTopColor: "#ddd",
-        position: "absolute",
-        bottom: 0,
-        backgroundColor: "#fff",
     },
     secHeader: {
         width: "100%",
@@ -435,5 +452,95 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    balancesRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 24,
+        paddingHorizontal: 16,
+        width: '100%',
+    },
+    balanceColumn: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    balanceLabel: {
+        fontSize: 16,
+        color: '#224e41',
+        marginBottom: 0,
+        textAlign: 'center',
+    },
+    balanceAmount: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#224e41',
+        textAlign: 'center',
+    },
+    gainTextNoText: {
+        fontSize: 14,
+        color: '#e3f6ff',
+        marginLeft: 4,
+        fontWeight: "400",
+        marginTop: 5
+    },
+    balanceAmountWallet: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#7e0001',
+        textAlign: 'center',
+    },
+    balanceLabelWallet: {
+        fontSize: 16,
+        color: '#7e0001',
+        marginBottom: 0,
+        textAlign: 'center',
+    },
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    modalContainer: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        maxHeight: '60%',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '400',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    brokerOption: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderColor: '#eee',
+    },
+    brokerText: {
+        fontSize: 16,
+        color: '#333',
+        textAlign: 'center',
+    },
+    modalCloseButton: {
+        marginTop: 16,
+        paddingVertical: 12,
+        backgroundColor: '#102a54',
+        borderRadius: 8,
+    },
+    modalCloseText: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

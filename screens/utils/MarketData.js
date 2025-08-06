@@ -1,37 +1,26 @@
-export const marketData = [
-    {
-        id: 1,
-        category: 'Gainer',
-        ticker: 'SMER',
-        price: 9.6,
-        change: 9.84
-    },
-    {
-        id: 2,
-        category: 'Gainer',
-        ticker: 'AMAC',
-        price: 74.0,
-        change: 9.63
-    },
-    {
-        id: 3,
-        category: 'Gainer',
-        ticker: 'TOTL',
-        price: 27.85,
-        change: 9.22
-    },
-    {
-        id: 6,
-        category: 'Loser',
-        ticker: 'JUB',
-        price: 240.5,
-        change: -9.93
-    },
-    {
-        id: 7,
-        category: 'Loser',
-        ticker: 'PORT',
-        price: 45.75,
-        change: -9.85
-    },
+export const previousMarketData = [
+    { id: 1, category: 'Gainer', ticker: 'SMER', price: 9.6, change: 9.84 },
+    { id: 2, category: 'Gainer', ticker: 'AMAC', price: 74.0, change: 9.63 },
+    { id: 3, category: 'Gainer', ticker: 'TOTL', price: 27.85, change: 9.22},
+    { id: 4, category: 'Gainer', ticker: 'UCHM', price: 0.31, change: 6.9 },
+    { id: 5, category: 'Gainer', ticker: 'NCBA', price: 65.0, change: 3.59 },
+    { id: 6, category: 'Loser', ticker: 'JUB', price: 240.5, change: -9.93 },
+    { id: 7, category: 'Loser', ticker: 'PORT', price: 45.75, change: -9.85 },
+    { id: 8, category: 'Loser', ticker: 'BRIT', price: 7.64, change: -9.69 },
+    { id: 9, category: 'Loser', ticker: 'NBV', price: 1.74, change: -3.33 },
+    { id: 10, category: 'Loser', ticker: 'SLAM', price: 8.02, change: -2.43 }
+].sort((a, b) => a.ticker.localeCompare(b.ticker));
+
+
+export const currentMarketData = [
+    { id: 1, category: 'Gainer', ticker: 'SMER', price: 9.9, change: 9.84 },
+    { id: 2, category: 'Gainer', ticker: 'AMAC', price: 75.4, change: 9.63 },
+    { id: 3, category: 'Gainer', ticker: 'TOTL', price: 28.85, change: 9.22},
+    { id: 4, category: 'Gainer', ticker: 'UCHM', price: 1.31, change: 6.9 },
+    { id: 5, category: 'Gainer', ticker: 'NCBA', price: 69.0, change: 3.59 },
+    { id: 6, category: 'Loser', ticker: 'JUB', price: 248.5, change: -9.93 },
+    { id: 7, category: 'Loser', ticker: 'PORT', price: 39.75, change: -9.85 },
+    { id: 8, category: 'Loser', ticker: 'BRIT', price: 11.64, change: -9.69 },
+    { id: 9, category: 'Loser', ticker: 'NBV', price: 3.74, change: -3.33 },
+    { id: 10, category: 'Loser', ticker: 'SLAM', price: 6.02, change: -2.43 }
 ].sort((a, b) => a.ticker.localeCompare(b.ticker));

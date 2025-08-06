@@ -66,7 +66,12 @@ export default function SplashScreen({ navigation }) {
                 email, 
                 phone, 
                 portfolioBalance: 0,
-                walletBalance: 0
+                walletBalance: 0,
+                activeBroker: 'Not Set',
+                riskMode: 'Medium',
+                tradingMode: 'Automated',
+                prevStockVal: 0,
+                currStockVal: 0
             });
             await AsyncStorage.setItem('user', JSON.stringify({ id: docRef.id, pin }));
             
