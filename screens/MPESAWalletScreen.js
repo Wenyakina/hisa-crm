@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator, Alert, ScrollView,
+    ActivityIndicator, Modal, ScrollView,
     StyleSheet, View
 } from 'react-native';
 import {
@@ -20,6 +20,7 @@ export default function MPESAWalletScreen({ navigation }) {
     const [transactions, setTransactions] = useState([]);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [successModalVisible, setSuccessModalVisible] = useState(false);
 
     useEffect(() => {
         const getUserIdFromStorage = async () => {
@@ -33,8 +34,7 @@ export default function MPESAWalletScreen({ navigation }) {
                         fetchTransactions(userObj.id);
                     }
                 }
-            } 
-            catch (err) {
+            } catch (err) {
                 console.error('Failed to retrieve user from storage:', err);
             }
         };
@@ -75,20 +75,28 @@ export default function MPESAWalletScreen({ navigation }) {
         return new Promise(resolve => setTimeout(resolve, 1000));
     };
 
+    const showSuccessModal = () => {
+        setSuccessModalVisible(true);
+        setTimeout(() => {
+            setSuccessModalVisible(false);
+            navigation.goBack();
+        }, 3000); // Modal disappears after 3 seconds
+    };
+
     const handleDeposit = async () => {
         const amt = parseFloat(amount);
         if (isNaN(amt) || amt <= 0) {
-            Alert.alert('Invalid amount');
+            alert('Invalid amount');
             return;
         }
 
         if (!phone || phone.length < 10) {
-            Alert.alert('Enter a valid phone number');
+            alert('Enter a valid phone number');
             return;
         }
 
         if (!userId) {
-            Alert.alert('User not loaded yet');
+            alert('User not loaded yet');
             return;
         }
 
@@ -96,10 +104,7 @@ export default function MPESAWalletScreen({ navigation }) {
 
         try {
             // Simulate STK push
-            console.log('Simulating STK push to', phone);
             await simulateSTKPush();
-
-            Alert.alert('MPESA Payment Successful');
 
             // Update balance
             const newBalance = balance + amt;
@@ -124,9 +129,12 @@ export default function MPESAWalletScreen({ navigation }) {
             // Clear inputs
             setAmount('');
             setPhone('');
+
+            // Show success modal
+            showSuccessModal();
         } catch (err) {
             console.error('Error during deposit:', err);
-            Alert.alert('Something went wrong');
+            alert('Something went wrong');
         } finally {
             setLoading(false);
         }
@@ -197,6 +205,20 @@ export default function MPESAWalletScreen({ navigation }) {
                     ))
                 )}
             </ScrollView>
+
+            {/* Success Modal */}
+            <Modal
+                visible={successModalVisible}
+                transparent
+                animationType="fade"
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text variant="titleLarge">✅ Deposit Successful</Text>
+                        <Text style={{ marginTop: 10 }}>Your MPESA deposit has been processed.</Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -226,5 +248,18 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontStyle: 'italic',
         color: 'gray'
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center'
     }
 });
