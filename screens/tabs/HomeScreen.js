@@ -263,7 +263,6 @@ export default function HomeScreen({ navigation }) {
                                         </View>
                                     );
                                 })}
-
                             </View>
                         </View>
                     </View>

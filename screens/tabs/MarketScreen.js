@@ -1,7 +1,10 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { marketData } from '../utils/MarketData';
 
 export default function MarketScreen({ navigation }) {
+    const stockData = marketData;
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -9,41 +12,46 @@ export default function MarketScreen({ navigation }) {
                 {/* Market Highlights Section */}
                 <View style={styles.marketSection}>
                     <View style={styles.secHeader}>
-                        <Text style={styles.subtitle}>Wallet balance</Text>
-                        <Text style={styles.balance}>KES 0</Text>
+                        <Text style={styles.subtitle}>Today&apos;s Market Highlights</Text>
                     </View>
 
                     <View style={styles.marketContent}>
-                        <Text style={styles.marketTitle}>Today&apos;s Market Highlights</Text>
                         <View style={{ width: '100%' }}>
-                            {marketData.map((stock, index) => (
-                            <View key={stock.id}>
-                                <TouchableOpacity
-                                    style={styles.stockItem}
-                                    onPress={() => navigation.navigate('BuyStock', { stock })}
-                                    activeOpacity={0.7}>
-                                    <View style={styles.stockRow}>
-                                        <Text style={styles.stockName}>{stock.ticker}</Text>
-                                        <Text
-                                            style={[
-                                                styles.stockChange,
-                                                Number(stock.change) < 0 && { color: 'red' },
-                                                Number(stock.change) > 0 && { color: 'green' },
-                                            ]}>
-                                            {Number(stock.change) > 0
-                                                ? `↑ ${stock.change}%`
-                                                : Number(stock.change) < 0
-                                                ? `↓ ${Math.abs(stock.change)}%`
-                                                : `${stock.change}%`}
-                                        </Text>
-                                    </View>
-                                    <Text style={styles.topGainer}>{stock.category}</Text>
-                                </TouchableOpacity>
+                            {stockData.map((stock, index) => {
+                                const { prev_price, curr_price } = stock;
+                                const change = ((curr_price - prev_price) / prev_price) * 100;
+                                const isGain = change > 0;
+                                const isLoss = change < 0;
 
-                                {/* Add separator between items except after the last one */}
-                                {index !== marketData.length - 1 && <View style={styles.separator} />}
-                            </View>
-                            ))}
+                                return (
+                                    <View
+                                        key={stock.id}
+                                        style={styles.stockItem}
+                                        activeOpacity={0.7}>
+                                        <View style={styles.stockRow}>
+                                            <Text style={styles.stockName}>{stock.name}</Text>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                <Ionicons
+                                                    name={isGain ? "chevron-up" : isLoss ? "chevron-down" : "remove"}
+                                                    size={14}
+                                                    color={isGain ? "green" : isLoss ? "red" : "gray"}
+                                                    style={{ marginRight: 4 }}
+                                                />
+                                                <Text
+                                                    style={[
+                                                        styles.stockChange,
+                                                        { color: isGain ? "green" : isLoss ? "red" : "gray" }
+                                                    ]}>
+                                                    {change.toFixed(2)}%
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <Text style={styles.topGainer}>{stock.ticker}</Text>
+
+                                        {index !== marketData.length - 1 && <View style={styles.separatorMarketHighlight} />}
+                                    </View>
+                                );
+                            })}
                         </View>
                     </View>
                 </View>
@@ -117,12 +125,19 @@ const styles = StyleSheet.create({
         fontSize: 24, 
         marginTop: 24, 
         color: "#102a54",
-        fontWeight: "300"
+        fontWeight: "500"
     },
     balance: {
         fontSize: 30, 
         color: '#1c242e',
         fontWeight: "bold", 
         marginTop: 5
+    },
+    separatorMarketHighlight: {
+        height: 1,
+        backgroundColor: '#ddd',
+        marginVertical: 8,
+        marginTop: 16,
+        marginBottom: 8
     },
 });
