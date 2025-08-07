@@ -51,3 +51,31 @@ export const getUserIdAndBalance = async () => {
         };
     }
 };
+
+export const getUserDoc = async () => {
+    try {
+        const userStr = await AsyncStorage.getItem('user');
+
+        if (!userStr) return null;
+
+        const userObj = JSON.parse(userStr);
+        const userId = userObj?.id;
+
+        if (!userId) return null;
+
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            return { id: userId, ...userSnap.data() }; // include ID for convenience
+        } 
+        else {
+            console.warn('User document does not exist');
+            return null;
+        }
+    } 
+    catch (error) {
+        console.error('Error fetching user document:', error);
+        return null;
+    }
+};

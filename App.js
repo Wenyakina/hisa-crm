@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Import screens
 import BuyStockScreen from './screens/BuyStockScreen';
 import MPESAWalletScreen from './screens/MPESAWalletScreen';
+import SellStockScreen from './screens/SellStockScreen';
 import SplashScreen from './screens/SplashScreen';
 
 import HomeScreen from './screens/tabs/HomeScreen';
@@ -50,10 +51,11 @@ function MainTabs(){
 export default function App(){
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false, title: 'HISA' }}>
                 <Stack.Screen name="MPESAWallet" component={MPESAWalletScreen} options={{ headerShown: true, title: 'Fund Account' }} />
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="BuyStock" component={BuyStockScreen} options={{ headerShown: true, title: 'Buy Stock' }} />
+                <Stack.Screen name="SellStock" component={SellStockScreen} options={{ headerShown: true, title: 'Sell Stock' }} />
                 
                 <Stack.Screen name="MainApp" component={MainTabs} />
             </Stack.Navigator>
