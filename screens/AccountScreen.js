@@ -6,9 +6,13 @@ import { useEffect, useState } from 'react';
 import {
     Alert, ScrollView, StyleSheet
 } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import {
     Button,
     Card,
+    Dialog,
+    Portal,
+    Provider,
     Text,
     TextInput
 } from 'react-native-paper';
@@ -25,6 +29,7 @@ export default function AccountScreen() {
         company: '',
         walletBalance: 0
     });
+    const [showWithdrawSuccess, setShowWithdrawSuccess] = useState(false);
 
     useEffect(() => {
         const loadUser = async () => {
@@ -85,84 +90,98 @@ export default function AccountScreen() {
             return;
         }
 
-        setLoading(true);
-        setTimeout(async () => {
-            try {
-                const newBalance = userData.walletBalance - amount;
-                await updateDoc(doc(db, 'users', userId), {
-                    walletBalance: newBalance
-                });
-                setUserData(prev => ({ ...prev, walletBalance: newBalance }));
-                setWithdrawAmount('');
-                Alert.alert(`KES ${amount.toLocaleString()} withdrawn to MPESA`);
-            } catch (err) {
-                console.error(err);
-                Alert.alert('Withdrawal failed');
-            } finally {
-                setLoading(false);
-            }
-        }, 1500);
+        try {
+            const newBalance = userData.walletBalance - amount;
+            await updateDoc(doc(db, 'users', userId), {
+                walletBalance: newBalance
+            });
+            setUserData(prev => ({ ...prev, walletBalance: newBalance }));
+            setWithdrawAmount('');
+            setShowWithdrawSuccess(true);
+        } catch (err) {
+            console.error(err);
+            Alert.alert('Withdrawal failed');
+        }
     };
 
     return (
-        <ScrollView 
-            contentContainerStyle={styles.scrollContent}
-            style={styles.container}>
-            <Card style={styles.card}>
-                <Card.Content>
-                    <Text variant="titleMedium" style={{ marginBottom: 10 }}>
-                        Wallet Balance: KES {userData.walletBalance?.toLocaleString() ?? 0}
-                    </Text>
+        <Provider>
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                style={styles.container}>
+                <Card style={styles.card}>
+                    <Card.Content>
+                        <Text variant="titleMedium" style={{ marginBottom: 10 }}>
+                            Wallet Balance: KES {userData.walletBalance?.toLocaleString() ?? 0}
+                        </Text>
 
-                    <TextInput
-                        label="Amount to Withdraw"
-                        value={withdrawAmount}
-                        onChangeText={setWithdrawAmount}
-                        keyboardType="numeric"
-                        mode="outlined"
-                        style={styles.input}
-                    />
+                        <TextInput
+                            label="Amount to Withdraw"
+                            value={withdrawAmount}
+                            onChangeText={setWithdrawAmount}
+                            keyboardType="numeric"
+                            mode="outlined"
+                            style={styles.input}
+                        />
 
-                    <Button
-                        mode="contained"
-                        onPress={handleWithdraw}
-                        disabled={loading || userData.walletBalance <= 0}
-                        style={styles.withdrawBtn}
-                        labelStyle={{ color: '#ffffff' }}>
-                        {loading ? 'Processing...' : 'Withdraw to MPESA'}
-                    </Button>
-                </Card.Content>
-            </Card>
+                        <Button
+                            mode="contained"
+                            onPress={handleWithdraw}
+                            disabled={userData.walletBalance <= 0}
+                            style={styles.withdrawBtn}
+                            labelStyle={{ color: '#ffffff' }}>
+                            Withdraw to MPESA
+                        </Button>
+                    </Card.Content>
+                </Card>
 
-            <TextInput
-                label="Full Name"
-                value={userData.name}
-                onChangeText={text => setUserData({ ...userData, name: text })}
-                mode="outlined"
-                style={styles.input}/>
-            <TextInput
-                label="Email"
-                value={userData.email}
-                onChangeText={text => setUserData({ ...userData, email: text })}
-                mode="outlined"
-                style={styles.input}
-                keyboardType="email-address"/>
-            <TextInput
-                label="Phone"
-                value={userData.phone}
-                mode="outlined"
-                style={styles.input}
-                keyboardType="phone-pad"
-                editable={false}/>
+                <TextInput
+                    label="Full Name"
+                    value={userData.name}
+                    onChangeText={text => setUserData({ ...userData, name: text })}
+                    mode="outlined"
+                    style={styles.input}/>
+                <TextInput
+                    label="Email"
+                    value={userData.email}
+                    onChangeText={text => setUserData({ ...userData, email: text })}
+                    mode="outlined"
+                    style={styles.input}
+                    keyboardType="email-address"/>
+                <TextInput
+                    label="Phone"
+                    value={userData.phone}
+                    mode="outlined"
+                    style={styles.input}
+                    keyboardType="phone-pad"
+                    editable={false}/>
 
-            <Button
-                mode="contained"
-                onPress={handleUpdateProfile}
-                style={styles.updateBtn}
-                disabled={loading}>
-                {loading ? 'Saving...' : 'Save'}
-            </Button>
-        </ScrollView>
+                <Button
+                    mode="contained"
+                    onPress={handleUpdateProfile}
+                    style={styles.updateBtn}
+                    disabled={loading}>
+                    {loading ? 'Saving...' : 'Save'}
+                </Button>
+            </ScrollView>
+
+            <Portal>
+                {showWithdrawSuccess && (
+                    <Dialog visible onDismiss={() => setShowWithdrawSuccess(false)}>
+                        <Animatable.View animation="zoomIn" duration={500}>
+                            <Dialog.Icon icon="check-circle" />
+                            <Dialog.Title>Success</Dialog.Title>
+                            <Dialog.Content>
+                                <Text>Your withdrawal was successful!</Text>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={() => setShowWithdrawSuccess(false)}>OK</Button>
+                            </Dialog.Actions>
+                        </Animatable.View>
+                    </Dialog>
+                )}
+            </Portal>
+        </Provider>
     );
 }
 

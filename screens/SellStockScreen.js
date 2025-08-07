@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Provider, Snackbar, Text, TextInput } from 'react-native-paper';
+import { Button, Dialog, Portal, Provider, Text, TextInput } from 'react-native-paper';
 import ReviewSellDialog from './dialogs/ReviewSellDialog';
 import { marketData } from './utils/MarketData';
 import { getUserDoc, getUserIdAndBalance } from './utils/UserData';
@@ -12,8 +12,7 @@ export default function SellStockScreen({ navigation }) {
     const [quantity, setQuantity] = useState('');
     const [maxQuantity, setMaxQuantity] = useState(0);
     const [estimatedRevenue, setEstimatedRevenue] = useState(0);
-    const [snackbarVisible, setSnackbarVisible] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [successDialogVisible, setSuccessDialogVisible] = useState(false);
     const [dialogVisible, setDialogVisible] = useState(false);
 
     useEffect(() => {
@@ -135,8 +134,7 @@ export default function SellStockScreen({ navigation }) {
                 onDismiss={(success) => {
                     setDialogVisible(false);
                     if (success) {
-                        setSnackbarMessage("Successfully sold shares.");
-                        setSnackbarVisible(true);
+                        setSuccessDialogVisible(true);
                         setTimeout(() => navigation.goBack(), 1500);
                     }
                 }}
@@ -148,14 +146,21 @@ export default function SellStockScreen({ navigation }) {
                 }}
             />
 
-
-            <Snackbar
-                visible={snackbarVisible}
-                onDismiss={() => setSnackbarVisible(false)}
-                duration={3000}
-                action={{ label: 'Dismiss', onPress: () => setSnackbarVisible(false) }}>
-                {snackbarMessage}
-            </Snackbar>
+            <Portal>
+                <Dialog visible={successDialogVisible} onDismiss={() => setSuccessDialogVisible(false)}>
+                    <Dialog.Icon icon="check-circle" />
+                    <Dialog.Title>Success</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>You have successfully sold your shares.</Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => {
+                            setSuccessDialogVisible(false);
+                            navigation.goBack();
+                        }}>Done</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </Provider>
     );
 }
