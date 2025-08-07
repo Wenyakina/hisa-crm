@@ -68,8 +68,6 @@ export default function BuyStockScreen({ navigation }) {
         setQuantity(numericVal);
     };
 
-    const isBuyDisabled = estimatedCost > balance || !unitPrice || (!selectedQty && !quantity);
-
     return (
         <Provider>
             <ScrollView contentContainerStyle={styles.container}>
@@ -120,8 +118,7 @@ export default function BuyStockScreen({ navigation }) {
                             style={[styles.input, styles.customInputBorder]}
                             textColor="#000"
                             selectionColor="#000"
-                            outlineColor="#000"
-                        />
+                            outlineColor="#000" />
                     }>
                     <Menu.Item onPress={() => { setOrderType('Market'); closeMenu(); }} title="Market" />
                     <Divider />

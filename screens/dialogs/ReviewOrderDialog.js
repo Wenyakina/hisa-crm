@@ -17,8 +17,9 @@ export default function ReviewOrderDialog({ visible, onDismiss, orderDetails }) 
 
     const handleConfirm = async () => {
         setLoading(true);
+        
         try {
-            const { userId, walletBalance } = await getUserIdAndBalance();
+            const { userId, walletBalance, portfolioBalance } = await getUserIdAndBalance();
 
             const orderData = {
                 ticker,
@@ -33,14 +34,18 @@ export default function ReviewOrderDialog({ visible, onDismiss, orderDetails }) 
             const userRef = doc(db, 'users', userId);
             const updatedWalletBalance = walletBalance - estimatedCost;
 
+            const newPortfolioBalance = portfolioBalance + (quantity * unitPrice);
+
             await updateDoc(userRef, {
                 [saveKey]: arrayUnion(orderData),
-                walletBalance: updatedWalletBalance
+                walletBalance: updatedWalletBalance,
+                portfolioBalance: newPortfolioBalance
             });
 
             setLoading(false);
             onDismiss(true);
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Error saving order and updating wallet balance:', error);
             setLoading(false);
             onDismiss(false);
@@ -83,23 +88,21 @@ export default function ReviewOrderDialog({ visible, onDismiss, orderDetails }) 
                 </View>
 
                 <View style={styles.buttonRow}>
-    <TouchableOpacity style={[styles.button, styles.cancel]} onPress={() => onDismiss(false)} disabled={loading}>
-        <Text style={styles.buttonText}>Cancel</Text>
-    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, styles.cancel]} onPress={() => onDismiss(false)} disabled={loading}>
+                        <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
 
-    <TouchableOpacity
-        style={[styles.button, styles.confirm, loading && { opacity: 0.6 }]}
-        onPress={handleConfirm}
-        disabled={loading}
-    >
-        {loading ? (
-            <ActivityIndicator color="#fff" />
-        ) : (
-            <Text style={styles.buttonText}>Confirm</Text>
-        )}
-    </TouchableOpacity>
-</View>
-
+                    <TouchableOpacity
+                        style={[styles.button, styles.confirm, loading && { opacity: 0.6 }]}
+                        onPress={handleConfirm}
+                        disabled={loading}>
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Confirm</Text>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
         </Modal>
     );
