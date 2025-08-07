@@ -80,7 +80,8 @@ export default function SellStockScreen({ navigation }) {
                                     mode="outlined"
                                     disabled={stock.quantity <= 0}
                                     onPress={() => handleSelectStock(stock)}
-                                    style={styles.sellButton}>
+                                    style={styles.sellButton}
+                                    labelStyle={{ color: '#fff' }}>
                                     SELL
                                 </Button>
                             </View>
@@ -206,7 +207,12 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     sellButton: {
-        borderColor: '#1976D2',
+        backgroundColor: '#d32f2f',
+        borderRadius: 5,
+        borderWidth: 0,
+        borderColor: '#d32f2f',
+        paddingHorizontal: 0,
+        paddingVertical: 0,
     },
     estimatedLabel: {
         fontSize: 16,
