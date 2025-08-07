@@ -1,7 +1,7 @@
 import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Divider, Menu, Provider, Snackbar, Text, TextInput } from 'react-native-paper';
+import { Button, Dialog, Divider, Menu, Portal, Provider, Text, TextInput } from 'react-native-paper';
 import ReviewOrderDialog from './dialogs/ReviewOrderDialog';
 import { marketData } from './utils/MarketData';
 import { getUserIdAndBalance } from './utils/UserData';
@@ -215,16 +215,14 @@ export default function BuyStockScreen({ navigation }) {
                     estimatedCost
                 }}/>
             
-            <Snackbar
-                visible={snackbarVisible}
-                onDismiss={() => setSnackbarVisible(false)}
-                duration={3000}
-                action={{
-                    label: 'Dismiss',
-                    onPress: () => setSnackbarVisible(false),
-                }}>
-                {snackbarMessage}
-            </Snackbar>
+            <Portal>
+                <Dialog visible={snackbarVisible} dismissable={false}>
+                    <Dialog.Title>Success</Dialog.Title>
+                    <Dialog.Content>
+                        <Text>{snackbarMessage}</Text>
+                    </Dialog.Content>
+                </Dialog>
+            </Portal>
         </Provider>
     );
 }
