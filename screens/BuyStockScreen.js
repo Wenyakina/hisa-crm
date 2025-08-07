@@ -1,9 +1,9 @@
 import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Divider, Menu, Provider, Text, TextInput } from 'react-native-paper';
+import { Button, Divider, Menu, Provider, Snackbar, Text, TextInput } from 'react-native-paper';
 import ReviewOrderDialog from './dialogs/ReviewOrderDialog';
-import { currentMarketData } from './utils/MarketData';
+import { marketData } from './utils/MarketData';
 import { getUserIdAndBalance } from './utils/UserData';
 
 export default function BuyStockScreen({ navigation }) {
@@ -13,7 +13,7 @@ export default function BuyStockScreen({ navigation }) {
     const [orderType, setOrderType] = useState('Limit');
     const [menuVisible, setMenuVisible] = useState(false);
     const [selectedQty, setSelectedQty] = useState(null);
-    const [unitPrice, setUnitPrice] = useState(Number(selectedStock.price) || 0);
+    const [unitPrice, setUnitPrice] = useState(Number(selectedStock.curr_price) || 0);
     const [quantity, setQuantity] = useState(0);
     const [estimatedCost, setEstimatedCost] = useState(0);
     const [balance, setBalance] = useState(0);
@@ -24,11 +24,13 @@ export default function BuyStockScreen({ navigation }) {
     const closeMenu = () => setMenuVisible(false);
 
     const [dialogVisible, setDialogVisible] = useState(false);
-    const [lastOrderSuccess, setLastOrderSuccess] = useState(null);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredTickers, setFilteredTickers] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
+
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     useEffect(() => {
         const loadBalance = async () => {
@@ -45,8 +47,9 @@ export default function BuyStockScreen({ navigation }) {
             return;
         }
 
-        const filtered = currentMarketData.filter(stock =>
-            stock.ticker.toLowerCase().includes(searchQuery.toLowerCase())
+        const filtered = marketData.filter(stock =>
+            stock.ticker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            stock.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
         setFilteredTickers(filtered);
@@ -70,13 +73,16 @@ export default function BuyStockScreen({ navigation }) {
     return (
         <Provider>
             <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.label}>Search Ticker</Text>
+                <Text style={styles.label}>Search Ticker or Name</Text>
                 <TextInput
                     mode="outlined"
-                    placeholder="Enter Ticker (e.g., KCB)"
+                    placeholder="Enter Ticker or Name (e.g., KCB)"
                     value={searchQuery}
                     onChangeText={text => setSearchQuery(text)}
-                    style={[styles.input, styles.customInputBorder]}/>
+                    style={[styles.input, styles.customInputBorder]}
+                    textColor="#000"
+                    selectionColor="#000"
+                    outlineColor="#000"/>
 
                 {showSearchResults && filteredTickers.length > 0 && (
                     <View style={{ marginBottom: 16, backgroundColor: '#f0f0f0', borderRadius: 6 }}>
@@ -85,29 +91,21 @@ export default function BuyStockScreen({ navigation }) {
                                 key={stock.id}
                                 mode="text"
                                 onPress={() => {
-                                    setSearchQuery(stock.ticker);
+                                    setSearchQuery(stock.name);
                                     setShowSearchResults(false);
                                     navigation.setParams({ stock }); // Update route stock
-                                    setUnitPrice(stock.price);
+                                    setUnitPrice(stock.curr_price);
                                 }}
                                 contentStyle={{ justifyContent: 'flex-start' }}
                                 textColor="#1976D2"
                                 style={{ paddingVertical: 4, borderBottomWidth: 0.5, borderColor: '#ccc' }}>
-                                {stock.ticker} - {stock.category} @ {stock.price} KES
+                                {stock.name} - {stock.ticker}
                             </Button>
                         ))}
                     </View>
                 )}
 
-                <Text style={styles.header}>Buy {selectedStock.ticker}</Text>
-                <Text style={styles.subheader}>{selectedStock.category}</Text>
-
-                <Text style={styles.price}>
-                    {selectedStock.price} KES{' '}
-                    <Text style={[styles.priceChange, selectedStock.change > 0 ? { color: 'green' } : { color: 'red' }]}> 
-                        {selectedStock.change > 0 ? `▲ ${selectedStock.change}` : `▼ ${Math.abs(selectedStock.change)}`} 
-                    </Text>
-                </Text>
+                <Text style={styles.header}>Buy {selectedStock.name}</Text>
 
                 <Text style={styles.label}>Order Type</Text>
                 <Menu
@@ -120,6 +118,9 @@ export default function BuyStockScreen({ navigation }) {
                             editable={false}
                             right={<TextInput.Icon icon="menu-down" onPress={openMenu} />}
                             style={[styles.input, styles.customInputBorder]}
+                            textColor="#000"
+                            selectionColor="#000"
+                            outlineColor="#000"
                         />
                     }>
                     <Menu.Item onPress={() => { setOrderType('Market'); closeMenu(); }} title="Market" />
@@ -136,7 +137,10 @@ export default function BuyStockScreen({ navigation }) {
                     keyboardType="numeric"
                     value={unitPrice.toString()}
                     onChangeText={(text) => setUnitPrice(parseFloat(text) || 0)}
-                    style={[styles.input, styles.customInputBorder]}/>
+                    style={[styles.input, styles.customInputBorder]}
+                    textColor="#000"
+                    selectionColor="#000"
+                    outlineColor="#000"/>
 
                 <Text style={styles.label}>Quantity</Text>
                 <TextInput
@@ -145,7 +149,10 @@ export default function BuyStockScreen({ navigation }) {
                     keyboardType="numeric"
                     value={quantity.toString()}
                     onChangeText={handleQuantityChange}
-                    style={[styles.input, styles.customInputBorder]}/>
+                    style={[styles.input, styles.customInputBorder]}
+                    textColor="#000"
+                    selectionColor="#000"
+                    outlineColor="#000" />
 
                 <View style={styles.quickQuantity}>
                     {quantities.map((qty) => {
@@ -174,10 +181,17 @@ export default function BuyStockScreen({ navigation }) {
 
                 <Button
                     mode="contained"
-                    disabled={isBuyDisabled}
+                    disabled={!unitPrice || (!selectedQty && !quantity)}
                     style={styles.reviewButton}
                     labelStyle={{ color: 'white' }}
-                    onPress={() => setDialogVisible(true)}>
+                    onPress={() => {
+                        if (estimatedCost > balance) {
+                            setSnackbarMessage("Insufficient balance to place this order.");
+                            setSnackbarVisible(true);
+                        } else {
+                            setDialogVisible(true);
+                        }
+                    }}>
                     REVIEW ORDER
                 </Button>
             </ScrollView>
@@ -186,10 +200,14 @@ export default function BuyStockScreen({ navigation }) {
                 visible={dialogVisible}
                 onDismiss={(success) => {
                     setDialogVisible(false);
-                    setLastOrderSuccess(success);
+
                     if(success){
-                        setQuantity(0);
-                        setSelectedQty(null);
+                        setSnackbarMessage("Successfully bought shares.");
+                        setSnackbarVisible(true);
+
+                        setTimeout(() => {
+                            navigation.goBack();
+                        }, 1500);
                     }
                 }}
                 orderDetails={{
@@ -197,9 +215,19 @@ export default function BuyStockScreen({ navigation }) {
                     unitPrice,
                     quantity: selectedQty || quantity,
                     orderType,
-                    estimatedCost,
-                    category: selectedStock.category,
+                    estimatedCost
                 }}/>
+            
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000}
+                action={{
+                    label: 'Dismiss',
+                    onPress: () => setSnackbarVisible(false),
+                }}>
+                {snackbarMessage}
+            </Snackbar>
         </Provider>
     );
 }

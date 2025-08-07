@@ -14,7 +14,7 @@ export default function MarketScreen({ navigation }) {
                     </View>
 
                     <View style={styles.marketContent}>
-                        <Text style={styles.marketTitle}>Today's Market Highlights</Text>
+                        <Text style={styles.marketTitle}>Today&apos;s Market Highlights</Text>
                         <View style={{ width: '100%' }}>
                             {marketData.map((stock, index) => (
                             <View key={stock.id}>
