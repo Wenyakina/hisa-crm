@@ -4,7 +4,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { useCallback, useState } from "react";
 import { RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { db } from '../../firebaseConfig';
-import { marketData } from '../utils/MarketData';
+import { activeBrokersData, marketData } from '../utils/MarketData';
 import { getUserIdAndBalance } from '../utils/UserData';
 
 const TITLE_SIZE = 48;
@@ -274,14 +274,14 @@ export default function HomeScreen({ navigation }) {
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalTitle}>Select Active Broker</Text>
                     <ScrollView>
-                        {marketData.map((stock) => (
+                        {activeBrokersData.map((stock) => (
                         <TouchableOpacity
                             key={stock.id}
                             style={styles.brokerOption}
                             onPress={async () => {
-                                setActiveBroker(stock.ticker);
+                                setActiveBroker(stock.name);
                                 setBrokerModalVisible(false);
-                                await updateActiveBrokerInFirestore(stock.ticker);
+                                await updateActiveBrokerInFirestore(stock.name);
                             }}>
                             <Text style={styles.brokerText}>{stock.name}</Text>
                         </TouchableOpacity>

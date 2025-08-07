@@ -10,3 +10,22 @@ export const marketData = [
     { id: 9, ticker: 'DTK', name: 'Diamond Trust Bank', prev_price: 77.25, curr_price: 76.75 },
     { id: 10, ticker: 'EABL', name: 'East African Breweries', prev_price: 208.75, curr_price: 207.75 },
 ].sort((a, b) => a.ticker.localeCompare(b.ticker));
+
+
+export const activeBrokersData = [
+    { id: 1, name: 'D&B' },
+    { id: 2, name: 'Suntra' },
+    { id: 3, name: 'Francis Drummond' },
+    { id: 4, name: 'Old Mutual' },
+    { id: 5, name: 'Stanbic' },
+    { id: 6, name: 'AIB-AXYS' },
+    { id: 7, name: 'ABC' },
+    { id: 8, name: 'Faida' },
+    { id: 9, name: 'SIB' },
+    { id: 10, name: 'Genghis' },
+    { id: 11, name: 'NCBA' },
+    { id: 12, name: 'Equity' },
+    { id: 13, name: 'KCB' },
+    { id: 14, name: 'ABSA' },
+    { id: 15, name: 'EFG' },
+].sort((a, b) => a.name.localeCompare(b.name));
