@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Import screens
+import AccountScreen from './screens/AccountScreen';
 import BuyStockScreen from './screens/BuyStockScreen';
 import MPESAWalletScreen from './screens/MPESAWalletScreen';
 import SellStockScreen from './screens/SellStockScreen';
@@ -56,7 +57,7 @@ export default function App(){
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="BuyStock" component={BuyStockScreen} options={{ headerShown: true, title: 'Buy Stock' }} />
                 <Stack.Screen name="SellStock" component={SellStockScreen} options={{ headerShown: true, title: 'Sell Stock' }} />
-                
+                <Stack.Screen name="Account" component={AccountScreen} options={{ headerShown: true, title: 'My Account' }}/>
                 <Stack.Screen name="MainApp" component={MainTabs} />
             </Stack.Navigator>
         </NavigationContainer>

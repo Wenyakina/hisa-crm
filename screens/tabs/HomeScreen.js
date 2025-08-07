@@ -107,7 +107,7 @@ export default function HomeScreen({ navigation }) {
                     <View style={styles.secHeader}>
                         <View style={styles.titleContainer}>
                             <Text style={styles.title}>HISA</Text>
-                            <TouchableOpacity style={styles.globeIcon}>
+                            <TouchableOpacity style={styles.globeIcon} onPress={() => navigation.navigate('Account')}>
                                 <Ionicons name="globe-outline" size={TITLE_SIZE * 0.8} color="#102a54" />
                             </TouchableOpacity>
                         </View>
